@@ -1,0 +1,43 @@
+#
+# make the drafthouse local target-snowflake wheel
+#
+
+PYTHON3=    python3
+SCP=        scp
+
+INSTALL_HOST=   repo-01.awsi.drafthouse.com
+INSTALL_DIR=    /var/www/html/meltano/targets
+
+OTHER_SOURCES=\
+    CHANGELOG.md	\
+    LICENSE	\
+    README.md	\
+    docker-compose.yml	\
+    docker-entrypoint.sh	\
+    pytest.ini
+
+PYTHON_SOURCES=\
+    setup.py	\
+    target_snowflake/__init__.py	\
+    target_snowflake/connection.py	\
+    target_snowflake/exceptions.py	\
+    target_snowflake/snowflake.py	\
+    target_snowflake/sql.py	\
+    tests/fixtures.py	\
+    tests/test_target_snowflake.py
+
+all:    dist
+
+clean:
+	rm -rf build
+
+clobber:
+	rm -rf build dist target_snowflake.egg-info
+
+dist:   $(OTHER_SOURCES) $(PYTHON_SOURCES)
+	$(PYTHON3) setup.py sdist bdist_wheel
+
+install:    dist
+	$(SCP) dist/* $(INSTALL_HOST):$(INSTALL_DIR)
+
+.PHONY: all install clean clobber dist
